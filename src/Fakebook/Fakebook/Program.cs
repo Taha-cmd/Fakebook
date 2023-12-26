@@ -1,8 +1,11 @@
+using Fakebook.Entities;
 using Fakebook.Interfaces;
 using Fakebook.IoCExtensions;
 using Fakebook.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Console.WriteLine("Hello world");
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -15,14 +18,34 @@ builder.Configuration.AddCustomAzureAppConfiguration(); // custom method
 builder.Configuration.AddCustomAzureKeyVault(); // custom method
 builder.Services.AddDatabase(builder.Configuration); // Custom method
 
-
 var app = builder.Build();
-
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.MapGet("/Users", (IUserService userService) => userService.GetAllUsers());
+
+var usersEndpoint = app.MapGroup("/Users")
+    .WithName("Users")
+    .WithOpenApi();
+
+usersEndpoint
+    .MapGet("/", (IUserService userService) => userService.GetAllUsers())
+    .WithName(nameof(IUserService.GetAllUsers));
+
+usersEndpoint
+    .MapGet("/{id}", (IUserService userService, string id) => userService.GetUserById(id))
+    .WithName(nameof(IUserService.GetUserById));
+
+usersEndpoint.MapPost("/", (IUserService userService, User user) =>
+{
+    var createdUser = userService.CreateUser(user);
+    return Results.Created($"/Users/{createdUser.Id}", createdUser);
+})
+    .WithName(nameof(IUserService.CreateUser));
+
+usersEndpoint
+    .MapDelete("/{id}", (IUserService userService, string id) => userService.DeleteUserById(id))
+    .WithName(nameof(IUserService.DeleteUserById));
 
 app.Run();
 

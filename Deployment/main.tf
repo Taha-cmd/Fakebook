@@ -39,6 +39,10 @@ provider "azurerm" {
 
 provider "docker" {
 
+  registry_auth {
+    address     = "docker.io"
+    config_file = pathexpand("~/.docker/config.json")
+  }
 }
 
 # https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs#azure

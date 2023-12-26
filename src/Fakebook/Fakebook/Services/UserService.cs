@@ -16,7 +16,11 @@ public class UserService : IUserService
 
     public User CreateUser(User user)
     {
-        throw new NotImplementedException();
+        _logger.LogInformation("Create user {user}", user.Id);
+        _fakebookDbContext.Users.Add(user);
+        _fakebookDbContext.SaveChanges();
+
+        return GetUserById(user.Id);
     }
 
     public User GetUserById(string id)
@@ -31,14 +35,13 @@ public class UserService : IUserService
         return _fakebookDbContext.Users.ToList();
     }
 
-    public void DeleteUser(User user)
+    public void DeleteUserById(string id)
     {
-        throw new NotImplementedException();
-    }
+        _logger.LogInformation("Delete user with id {id}", id);
 
-    public void DeleteUserById(string user)
-    {
-        throw new NotImplementedException();
+        var user = GetUserById(id);
+        _fakebookDbContext.Users.Remove(user);
+        _fakebookDbContext.SaveChanges();
     }
 }
 

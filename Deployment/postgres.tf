@@ -42,13 +42,61 @@ resource "azurerm_app_configuration_key" "postgres_config_values" {
   for_each = {
     PG_HOST     = azurerm_postgresql_flexible_server.this.fqdn
     PG_DATABASE = azurerm_postgresql_flexible_server_database.this.name
-    PG_USER     = azurerm_user_assigned_identity.app.client_id
+    PG_USER     = azurerm_user_assigned_identity.app.name
   }
 
   depends_on             = [azurerm_role_assignment.config_store_data_owner]
   configuration_store_id = azurerm_app_configuration.this.id
 
-  locked = true
+  locked = true # Make it readonly
   key    = each.key
   value  = each.value
+}
+
+# Enable workload identity in postgres:
+# https://learn.microsoft.com/en-us/azure/postgresql/single-server/how-to-connect-with-managed-identity#creating-a-postgresql-user-for-your-managed-identity
+resource "terraform_data" "create_pg_user" {
+  depends_on = [
+    azurerm_postgresql_flexible_server.this,
+    azurerm_postgresql_flexible_server_database.this,
+    azurerm_postgresql_flexible_server_active_directory_administrator.this,
+    azurerm_postgresql_flexible_server_firewall_rule.public_access
+  ]
+
+  triggers_replace = {
+    identity = azurerm_user_assigned_identity.app.client_id
+    server   = azurerm_postgresql_flexible_server.this.id
+    database = azurerm_postgresql_flexible_server_database.this.id
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["pwsh", "-Command"]
+
+    environment = {
+      "PGHOST"     = azurerm_postgresql_flexible_server.this.fqdn
+      "PGDATABASE" = "postgres" # https://github.com/MicrosoftDocs/azure-docs/issues/102693#issuecomment-1798118261
+      "PGUSER"     = data.azurerm_client_config.current.client_id
+
+      "IDENTITY_NAME"   = azurerm_user_assigned_identity.app.name
+      "TARGET_DATABASE" = azurerm_postgresql_flexible_server_database.this.name
+    }
+
+    # https://github.com/MicrosoftDocs/azure-docs/issues/102693#issuecomment-1668488887
+    # https://stackoverflow.com/a/77289725
+
+    # TODO: test this in greenfield again
+    # Quoting hell:
+    # database names with hyphens must be quoted
+    # double quotes must be escaped with ` in powershell and with \ for postgres
+    command = <<EOT
+      $env:PGPASSWORD = az account get-access-token --resource-type oss-rdbms --output tsv --query accessToken
+
+      # Create a user for the app in the root database
+      psql --dbname "postgres" --no-password --command "SELECT * FROM pgaadauth_create_principal('$($env:IDENTITY_NAME)', false, false);"
+
+      # Connect to the app's database as admin and grant the user all permissions to the database
+      psql --dbname "$($env:TARGET_DATABASE)" --no-password --command "GRANT ALL ON SCHEMA public TO \`"$($env:IDENTITY_NAME)\`";"
+
+    EOT
+  }
 }

@@ -1,0 +1,27 @@
+@url = csp-ws2023.northeurope.azurecontainer.io
+@port = 8080
+@protocol = http
+@fqdn = {{protocol}}://{{url}}:{{port}}
+
+###
+GET {{fqdn}}/Users
+Accept: application/json
+
+###
+@id = 169a74f3-5f3c-46c9-acf8-e7f4d3b839ce
+GET {{fqdn}}/Users/{{id}}
+Accept: application/json
+
+###
+POST {{fqdn}}/Users
+Content-Type: application/json
+
+{
+    "Id": "{{$guid}}",
+    "Name": "John Doe",
+    "Email": "John@fake.com"
+}
+
+###
+@id = 451e9014-9dd0-4369-af03-aa3ef0520104
+DELETE {{fqdn}}/Users/{{id}}

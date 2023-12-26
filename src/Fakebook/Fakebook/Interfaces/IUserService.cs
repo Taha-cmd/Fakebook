@@ -8,7 +8,6 @@ public interface IUserService
     User GetUserById(string id);
     IReadOnlyCollection<User> GetAllUsers();
 
-    void DeleteUser(User user);
     void DeleteUserById(string user);
 }
 
