@@ -44,15 +44,3 @@ provider "docker" {
     config_file = pathexpand("~/.docker/config.json")
   }
 }
-
-# https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs#azure
-# provider "postgresql" {
-#   host                = azurerm_postgresql_flexible_server.this.fqdn
-#   port                = "5432"
-#   database            = "postgres"
-#   username            = azurerm_postgresql_flexible_server_active_directory_administrator.this.principal_name
-#   sslmode             = "require"
-#   azure_identity_auth = true
-#   azure_tenant_id     = azurerm_postgresql_flexible_server_active_directory_administrator.this.tenant_id
-# }
-
