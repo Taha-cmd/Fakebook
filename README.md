@@ -4,4 +4,4 @@
 * docker
 * dotnet
 * pwsh
-* pgadmin (choco install pgadmin4)
+* psql (choco install pgadmin4)

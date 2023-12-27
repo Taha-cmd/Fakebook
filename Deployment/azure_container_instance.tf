@@ -29,6 +29,7 @@ resource "azurerm_container_group" "app" {
     environment_variables = {
       "CONFIG_STORE_ENDPOINT" = azurerm_app_configuration.this.endpoint
       "KEY_VAULT_ENDPOINT"    = azurerm_key_vault.this.vault_uri
+      "ASPNETCORE_HTTP_PORTS" = local.app_port # https://learn.microsoft.com/en-us/dotnet/core/compatibility/containers/8.0/aspnet-port
     }
   }
 }
