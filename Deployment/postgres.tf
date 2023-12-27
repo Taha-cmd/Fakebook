@@ -73,9 +73,8 @@ resource "terraform_data" "create_pg_user" {
     interpreter = ["pwsh", "-Command"]
 
     environment = {
-      "PGHOST"     = azurerm_postgresql_flexible_server.this.fqdn
-      "PGDATABASE" = "postgres" # https://github.com/MicrosoftDocs/azure-docs/issues/102693#issuecomment-1798118261
-      "PGUSER"     = data.azurerm_client_config.current.client_id
+      "PGHOST" = azurerm_postgresql_flexible_server.this.fqdn
+      "PGUSER" = data.azurerm_client_config.current.client_id
 
       "IDENTITY_NAME"   = azurerm_user_assigned_identity.app.name
       "TARGET_DATABASE" = azurerm_postgresql_flexible_server_database.this.name
@@ -91,7 +90,7 @@ resource "terraform_data" "create_pg_user" {
     command = <<EOT
       $env:PGPASSWORD = az account get-access-token --resource-type oss-rdbms --output tsv --query accessToken
 
-      # Create a user for the app in the root database
+      # Create a user for the app in the root database. See # https://github.com/MicrosoftDocs/azure-docs/issues/102693#issuecomment-1798118261
       psql --dbname "postgres" --no-password --command "SELECT * FROM pgaadauth_create_principal('$($env:IDENTITY_NAME)', false, false);"
 
       # Connect to the app's database as admin and grant the user all permissions to the database

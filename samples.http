@@ -8,8 +8,8 @@ GET {{fqdn}}/Users
 Accept: application/json
 
 ###
-@id = 169a74f3-5f3c-46c9-acf8-e7f4d3b839ce
-GET {{fqdn}}/Users/{{id}}
+@getId = 2e1ef15a-0ba0-4a62-9da7-55f30f7c41a6
+GET {{fqdn}}/Users/{{getId}}
 Accept: application/json
 
 ###
@@ -23,5 +23,5 @@ Content-Type: application/json
 }
 
 ###
-@id = 451e9014-9dd0-4369-af03-aa3ef0520104
-DELETE {{fqdn}}/Users/{{id}}
+@deleteId = 2e1ef15a-0ba0-4a62-9da7-55f30f7c41a6
+DELETE {{fqdn}}/Users/{{deleteId}}

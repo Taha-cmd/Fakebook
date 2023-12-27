@@ -13,10 +13,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IFakebookCache, FakebookCache>();
 
 builder.Configuration.AddCustomAzureAppConfiguration(); // custom method
 builder.Configuration.AddCustomAzureKeyVault(); // custom method
-builder.Services.AddDatabase(builder.Configuration); // Custom method
+builder.Services.AddDatabase(builder.Configuration); // custom method
+builder.Services.AddRedisCache(builder.Configuration); // custom method
 
 var app = builder.Build();
 
@@ -33,7 +35,12 @@ usersEndpoint
     .WithName(nameof(IUserService.GetAllUsers));
 
 usersEndpoint
-    .MapGet("/{id}", (IUserService userService, string id) => userService.GetUserById(id))
+    .MapGet("/{id}", (IUserService userService, string id) => 
+    {
+        var user = userService.GetUserById(id);
+
+        return user is null ? Results.NotFound() : Results.Ok(user);
+    })
     .WithName(nameof(IUserService.GetUserById));
 
 usersEndpoint.MapPost("/", (IUserService userService, User user) =>
