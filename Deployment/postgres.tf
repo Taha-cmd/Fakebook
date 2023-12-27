@@ -83,7 +83,6 @@ resource "terraform_data" "create_pg_user" {
     # https://github.com/MicrosoftDocs/azure-docs/issues/102693#issuecomment-1668488887
     # https://stackoverflow.com/a/77289725
 
-    # TODO: test this in greenfield again
     # Quoting hell:
     # database names with hyphens must be quoted
     # double quotes must be escaped with ` in powershell and with \ for postgres
