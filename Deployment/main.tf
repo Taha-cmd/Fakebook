@@ -9,11 +9,6 @@ terraform {
       version = "3.83"
     }
 
-    postgresql = {
-      source  = "cyrilgdn/postgresql"
-      version = "1.21.0"
-    }
-
     docker = {
       source  = "kreuzwerker/docker"
       version = "3.0.2"
@@ -39,8 +34,4 @@ provider "azurerm" {
 
 provider "docker" {
 
-  registry_auth {
-    address     = "docker.io"
-    config_file = pathexpand("~/.docker/config.json")
-  }
 }
